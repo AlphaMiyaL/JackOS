@@ -1,0 +1,93 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+    static int LENGTH;
+    static int NEXT;
+    static Array list;
+
+    /** Initializes the class. */
+    function void init() {
+        var Array next;
+        let LENGTH = 0;
+        let NEXT = 1;
+        let list = 2048;
+        let list[LENGTH] = 2;
+        let list[NEXT] = 2050;
+        let next = list[NEXT];
+        let next[LENGTH] = 16382;
+        let next[NEXT] = null;
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        var Array mem;
+        let mem = 0;
+        return mem[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        var Array mem;
+        let mem = 0;
+        let mem[address] = value;
+        return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var Array block;
+        var Array prev;
+        var Array next;
+
+        let block = list;
+        while(~(block[LENGTH] > size))
+        {
+            if(block[NEXT] = null)
+            {
+                do Sys.error(6);
+                return -1;
+            }
+            else
+            {
+                let prev = block;
+                let block = block[NEXT];
+            }
+        }
+        if(~(block[LENGTH] = size + 1))
+        {
+            let next = block + size + 1;
+            let next[LENGTH] = block[LENGTH] - (size + 1);
+            let next[NEXT] = block[NEXT];
+            let prev[NEXT] = next;
+        }
+        let block[LENGTH] = size + 1;
+        return block + 1;
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(int object) 
+    {
+        var Array node;
+        var Array deAl;
+        let deAl = object - 1;
+        let deAl[NEXT] = null;
+        let node = list;
+        while(~(node[NEXT] = null))
+        {
+            let node = node[NEXT];
+        }
+        let node[NEXT] = deAl;
+        return;
+    }
+}
